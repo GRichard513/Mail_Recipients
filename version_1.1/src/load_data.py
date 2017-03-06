@@ -83,3 +83,10 @@ def create_address_books(training, y_df):
         i+=1
 
     return address_books
+
+def clean(y_df):
+    y = y_df.recipients.values
+    for i in range(y.shape[0]):
+        y[i] = [recpt for recpt in y[i] if '@' in recpt]
+    y_df.recipients = y
+    return y_df
