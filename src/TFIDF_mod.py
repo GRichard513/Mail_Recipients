@@ -2,6 +2,9 @@ import nltk
 import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem.porter import PorterStemmer
+from nltk.corpus import stopwords
+
+cachedStopWords = stopwords.words("english")
 
 def stem_tokens(tokens, stemmer):
     stemmed = []
@@ -23,10 +26,16 @@ class TFIDF():
         for i in range(X.shape[0]):
             text = X.body[i]
             lowers = text.lower()
-            no_punctuation = lowers.translate(str.maketrans('','',string.punctuation))
-            self.token_dict[i] = no_punctuation
+            s=string.punctuation.replace('@','')
+            s=s.replace('+','')
 
-        tfidf = TfidfVectorizer(tokenizer=tokenize, stop_words='english')
+            no_punctuation = lowers.translate(str.maketrans('','',s))
+            y = " ".join(no_punctuation.split())
+            y = ' '.join([word for word in y.split() if word not in cachedStopWords])
+
+            self.token_dict[i] = y
+
+        tfidf = TfidfVectorizer(tokenizer=None, stop_words='english')
         X_tfidf = tfidf.fit_transform(self.token_dict.values())
 
         return X_tfidf
