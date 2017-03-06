@@ -56,7 +56,7 @@ def create_address_books(training, y_df):
     for index, series in training.iterrows():
         row = series.tolist()
         sender = row[0]
-        ids = row[1:][0].split(' ')
+        ids = row[1:][0].split()
         emails_ids_per_sender[sender] = ids
 
     # save all unique sender names
@@ -70,7 +70,7 @@ def create_address_books(training, y_df):
         recs_temp = []
         for my_id in ids:
             recipients = y_df[y_df.mid==int(my_id)].recipients.values[0]
-            recipients = [rec for rec in recipients if '@' in rec]
+            recipients = [rec for rec in recipients if ('@' in rec)]
             recs_temp.append(recipients)
         # flatten
         recs_temp = [elt for sublist in recs_temp for elt in sublist]
