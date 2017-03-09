@@ -78,7 +78,7 @@ class Predictor_CTFIDF():
         # perform centroid Tf-Idf. i.e each 10 most frequent recipients is represented
         # by an average of all mail he received.
         # exctract 10 most frequents recipients
-        self.k_most = [elt[0] for elt in address_books[self.sender][:20]] # 10 more frequent recipients
+        self.k_most = [elt[0] for elt in address_books[self.sender][:25]] # 20 more frequent recipients
         # perform average Tf-Idf on 10 most frequents recipients
         for recpt in self.k_most: # loop trough 10 most frequents recipients
             for i in range(X.shape[0]): # loop trough all mails send by sender
