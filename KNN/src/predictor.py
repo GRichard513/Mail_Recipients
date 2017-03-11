@@ -3,7 +3,7 @@ import numpy as np
 
 def complete_prediction(k, sender, address_books, res_temp, K=10):
     # k the number of recipients to predict
-    k_most = [elt[0] for elt in address_books[sender][:K] if elt not in res_temp]
+    k_most = [elt[0] for elt in address_books[sender][:K] if elt[0] not in res_temp]
     k_most = k_most[:k]
     if len(k_most) < k: # sender n'a pas assez de contacts
         k_most.extend([0] * (k-len(k_most)))
