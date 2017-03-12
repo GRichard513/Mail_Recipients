@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 import operator
+from proper_name import *
 
 def load_data(path_to_data):
     # load data files, assume utf-8 encoding
@@ -25,6 +26,8 @@ def load_data(path_to_data):
     X_df = join_data(training_info, training)
     X_sub_df = join_data(test_info, test)
 
+    X_df = create_names_df(X_df)
+    X_sub_df = create_names_df(X_sub_df)
     # remove non authorise adress from y_df (misssing @)
     y_df = clean(y)
 

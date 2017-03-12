@@ -1,5 +1,7 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import proper_name
+import re
 
 def softmax(X):
     exp = np.exp(X)
@@ -15,8 +17,9 @@ def complete_prediction(k, sender, address_books, res_, K=10):
 
 ## KNN
 class Predictor_KNN():
-    def __init__(self, X, y, sender, address_books,N=10):
-        self.train = X
+    def __init__(self, X_tfidf, y, sender, address_books, recipient_surnames, N=10):
+        self.recipient_surnames = recipient_surnames
+        self.train = X_tfidf
         self.predict = y.values
         self.sender = sender
         self.N = min(N,10)
@@ -24,18 +27,27 @@ class Predictor_KNN():
         self.res = []
         self.proba = []
 
-    def prediction(self, X):
+    def prediction(self, X, mail):
         for i in range(X.shape[0]): # loop trough each mails
             cos = cosine_similarity(X[i],self.train)[0] # cosine similarity
-            close = (-cosine_similarity(X[i],self.train)).argsort()[:,:][0] # 30 closest mails
+            close = (-cosine_similarity(X[i],self.train)).argsort()[:,:30][0] # 30 closest mails
             if self.N != 0:
                 NN_recpt = {}
-                for j in range(len(close)): # len(close) = 30 except if not enough mails, loop trough 30 closest mails
-                    for k in range(len(self.predict[close[j]])): # recipients in mails
-                        if self.predict[close[j]][k] in NN_recpt: # add recipient score to dictionnary
-                            NN_recpt[self.predict[close[j]][k]]+= cos[close[j]]
-                        else:
-                            NN_recpt[self.predict[close[j]][k]] = cos[close[j]]
+                # if message length < 5
+                if len(re.sub(r'[^\w\s]',' ',mail.body.values[i]).split()) > 5:
+                    for j in range(len(close)): # len(close) = 30 except if not enough mails, loop trough 30 closest mails
+                        for k in range(len(self.predict[close[j]])): # recipients in mails
+                            if self.predict[close[j]][k] in NN_recpt: # add recipient score to dictionnary
+                                NN_recpt[self.predict[close[j]][k]]+= cos[close[j]]
+                            else:
+                                NN_recpt[self.predict[close[j]][k]] = cos[close[j]]
+
+                # consider surnames at beginning of mails.
+                for rec, values in self.address_books[self.sender]:
+                    for name_ in mail.names.values[i]:
+                        if name_ == self.recipient_surnames[rec]:
+                            NN_recpt[rec] = 30
+
                 res_ = sorted(NN_recpt, key=NN_recpt.get, reverse=True) # output 10 largest recipients scores
                 proba_ = sorted(NN_recpt.values(), reverse=True)
             else:
