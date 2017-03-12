@@ -20,6 +20,9 @@ def apk(actual, predicted, k=10):
 def mapk(actual, predicted, k=10):
     return np.mean([apk(a,p,k) for a,p in zip(actual, predicted)])
 
+def mapk_arr(actual, predicted, k=10):
+    return [apk(a,p,k) for a,p in zip(actual, predicted)]
+
 def customed_map(y_true,y_pred,k=None):
     if k==None:
         k=len(y_pred)

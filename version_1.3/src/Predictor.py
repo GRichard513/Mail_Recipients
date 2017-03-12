@@ -20,7 +20,7 @@ class Predictor_KNN():
     def __init__(self, X_tfidf, y, sender, address_books, recipient_surnames, N=10):
         self.recipient_surnames = recipient_surnames
         self.train = X_tfidf
-        self.predict = y.values
+        self.predict = y
         self.sender = sender
         self.N = min(N,10)
         self.address_books = address_books
@@ -73,32 +73,32 @@ class Predictor_CTFIDF():
     def __init__(self, X, y, sender, address_books,N=10):
         self.N = min(N,10)
         self.train = X
-        self.predict = y.values
+        self.predict = y
         self.sender = sender
         self.address_books = address_books
-        self.X_recpt = {}
+        self.X_rec = {}
         self.res = []
         self.proba = []
 
         # perform centroid Tf-Idf. i.e each 10 most frequent recipients is represented
-        # by an average of all mail he received.
-        # exctract 10 most frequents recipients
+        # by a sum of all mails he/she received.
         self.k_most = [elt[0] for elt in address_books[self.sender][:20]] # 20 more frequent recipients
-        # perform average Tf-Idf on 10 most frequents recipients
-        for recpt in self.k_most: # loop trough 10 most frequents recipients
+        for rec in self.k_most: # loop trough most frequents recipients
             for i in range(X.shape[0]): # loop trough all mails send by sender
-                if recpt in self.predict[i]: # if recipients is in mail
-                    if recpt in self.X_recpt:
-                        self.X_recpt[recpt] += X[i,:]
+                if rec in self.predict[i]: # if recipients is in mail
+                    if rec in self.X_rec:
+                        self.X_rec[rec]+= X[i]
                     else:
-                        self.X_recpt[recpt] = X[i,:]
+                        self.X_rec[rec] = X[i]
 
     def prediction(self, X):
         cos = {}
         for i in range(X.shape[0]):
-            # cosine similarity with 10 most frequents recpt
-            for recpt, value in self.X_recpt.items():
-                cos[recpt] = cosine_similarity(X[i],self.X_recpt[recpt])[0,0]
+            # cosine similarity with 10 most frequents recpt Tf-Idf representation
+            for rec in self.X_rec:
+                cos[rec] = cosine_similarity(X[i],self.X_rec[rec])
+            if i==0:
+                print(cos)
             if self.N != 0:
                 # return the 10 most frequent recipients in order
                 # given by similarity to their centroid Tf-Idf representation
